@@ -30,7 +30,48 @@ Stellar has one of the best [developer ecosystems](https://www.stellar.org/devel
 
 ## Proposed protocol
 
+Prior to messaging, Alice and Bob convert their Ed25519 Elliptic Curve keys, corresponding to Stellar's seed and address, to Curve25519 keys allowing Elliptic Curve Diffie-Hellman exchange according to X25519.
 
+Let's call these keys ```sk_Bob, pk_Bob, sk_Alice, and pk_Alice```.
+
+Scenario: Bob sends a message to Alice
+
+#### Step 1: Diffie-Hellman
+
+Bob's calculates the shared secret by using his secret key and Alice's public key. Alice does the same salculation using her secret key and Bob's public key.  Let's call this shared 256-bit secret value ```k```.
+
+#### Step 2: Message encapsulation
+
+Describe the padding scheme, payload format, compression, ...
+
+#### Step 3: Encryption
+
+- Let's call ```x``` the padded and formatted payload (i.e plaintext).
+
+- The initiation vector (nonce) is given by
+
+        IV = hash(sequence_number || pk_Bob || pb_Alice)
+    where ```sequence_number``` is the sequential and increasing number attached to each transaction of a given Stellar address. The operator || above stands for string concatenation. 
+    This construction assures that ```IV``` is always unique, and also depends on the direction of the communication (even in the case if Alice sends Bob the exact same message with an equal sequence number, the IV will be different).
+
+- Extend the shared secret to 512 bits using a suitable Key Derivation Function
+        k1 || k2 = KDF(k)
+
+- First encryption round (using AES-256)
+        c1 = AES(x, IV, k1)
+
+- Second encryption round (using Twofish)
+        c2 = Twofish(c1, IV, k2)
+
+    **TODO: think carefuly about the security of the above 'roll-your-own' crypto... (this is always a VERY bad thing to do!)**
+
+#### Step 4: Sending the message
+
+The final encrypted message ```c2``` is set as the 32 byte ```MEMO_HASH``` field of the Stellar transaction object. A payment transaction is constructed (e.g. using the 0.0000001 XLM minimum amount). The total cost in this case will be 0.00000101 XLM per message block.
+
+#### Step 5: Decryption
+
+Perform opposite operations as during encryption.
 
 ## Proof of concept
 
