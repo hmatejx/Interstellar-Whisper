@@ -51,16 +51,20 @@ Describe the padding scheme, payload format, compression, ...
 - The initiation vector (nonce) is given by
 
         IV = hash(sequence_number || pk_Bob || pb_Alice)
+
     where ```sequence_number``` is the sequential and increasing number attached to each transaction of a given Stellar address. The operator || above stands for string concatenation. 
     This construction assures that ```IV``` is always unique, and also depends on the direction of the communication (even in the case if Alice sends Bob the exact same message with an equal sequence number, the IV will be different).
 
 - Extend the shared secret to 512 bits using a suitable Key Derivation Function
+
         k1 || k2 = KDF(k)
 
 - First encryption round (using AES-256)
+
         c1 = AES(x, IV, k1)
 
 - Second encryption round (using Twofish)
+
         c2 = Twofish(c1, IV, k2)
 
     **TODO: think carefuly about the security of the above 'roll-your-own' crypto... (this is always a VERY bad thing to do!)**
