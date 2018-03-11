@@ -38,11 +38,15 @@ Scenario: Bob sends a message to Alice
 
 #### Step 1: Diffie-Hellman
 
-Bob's calculates the shared secret by using his secret key and Alice's public key. Alice does the same salculation using her secret key and Bob's public key.  Let's call this shared 256-bit secret value ```k```.
+Bob's calculates the shared secret by using his secret key and Alice's public key. Alice does the same salculation using her secret key and Bob's public key.  Let's call this shared 256-bit secret value ```k```, 
+
+```
+k = ECDH(pk_Alice, sk_Bob) = ECDH(pk_Bob, sk_Alice)
+```
 
 #### Step 2: Message encapsulation
 
-Describe the padding scheme, payload format, compression, ...
+TODO: Describe the padding scheme, payload format, compression, ...
 
 #### Step 3: Encryption
 
@@ -50,12 +54,12 @@ Describe the padding scheme, payload format, compression, ...
 
 - The initiation vector (nonce) is given by
 
-        IV = hash(sequence_number || pk_Bob || pb_Alice)
+        IV = hash(sequence_number || pk_Bob || pk_Alice)
 
-    where ```sequence_number``` is the sequential and increasing number attached to each transaction of a given Stellar address. The operator || above stands for string concatenation. 
-    This construction assures that ```IV``` is always unique, and also depends on the direction of the communication (even in the case if Alice sends Bob the exact same message with an equal sequence number, the IV will be different).
+    where ```sequence_number``` is the sequential and increasing number attached to each transaction of a given Stellar address. The operator ```||``` above stands for string concatenation. 
+    This construction assures that ```IV``` is always unique. For example, if Alice want's to send a message to bob, the order of public keys must be reversed. Even if Alice sends Bob the exact same plaintext message with an equal sequence number (the sequence number is only guaranteed to be unique for each address separately), the ```IV``` will still be different.
 
-- Extend the shared secret to 512 bits using a suitable Key Derivation Function
+- Extend the 256-bit shared secret to 512 bits using a suitable Key Derivation Function
 
         k1 || k2 = KDF(k)
 
@@ -67,15 +71,15 @@ Describe the padding scheme, payload format, compression, ...
 
         c2 = Twofish(c1, IV, k2)
 
-    **TODO: think carefuly about the security of the above 'roll-your-own' crypto... (this is always a VERY bad thing to do!)**
+TODO: Think about a suitable hash for IV generation, suitable KDF for key extension in case of chaining multiple encryptions, and in general think carefuly about the security of the above 'roll-your-own' crypto... **this is always a VERY bad thing to do!**
 
 #### Step 4: Sending the message
 
-The final encrypted message ```c2``` is set as the 32 byte ```MEMO_HASH``` field of the Stellar transaction object. A payment transaction is constructed (e.g. using the 0.0000001 XLM minimum amount). The total cost in this case will be 0.00000101 XLM per message block.
+The final encrypted message ```c2``` is set as the 32 byte ```MEMO_HASH``` field of the Stellar transaction object. A payment transaction is constructed (e.g. using the 0.0000001 XLM minimum amount). The total cost in this case will be 0.00000101 XLM per message block (the total cost is the sum of the transaction fee and the payment amount).
 
 #### Step 5: Decryption
 
-Perform opposite operations as during encryption.
+Perform the respective inverse operations as during encryption.
 
 ## Proof of concept
 
