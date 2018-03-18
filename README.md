@@ -96,7 +96,7 @@ The encapsulation is easiest to describe on an example. Imagine wanting to trans
   | Header 6-8 | Content | Description | Symbol rate                                    |
   | ----------- | ------------------------- | ------------------------------------------------------------ | -------------------------- |
   | 000 | binary                    | no encoding, raw 8-bit                                       | 31 B / fragment      |
-  | 001         | SMS TEXT                  | [GSM 03.38 charset]( ![GSM 03.38 character set](https://www.openmarket.com/docs/Content/Images/sms/characterset-gsm-characters.png)) | 35 characters / fragment |
+  | 001         | SMS TEXT                  | [GSM 03.38 charset](https://www.openmarket.com/docs/Content/Images/sms/characterset-gsm-characters.png) | 35 characters / fragment |
   | 010         | restricted uppercase TEXT | [Sixbit ASCII](http://catb.org/gpsd/AIVDM.html#_ais_payload_data_types) | 41 characters / fragment |
   | 011         | TEXT                      | [smaz](https://github.com/antirez/smaz)/[smac](https://github.com/servalproject/smac/blob/master/README) compression | ~ 31 - 60 B / fragment |
   | 100         |                           | RESERVED for future use                                      |                            |
