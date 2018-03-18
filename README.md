@@ -52,7 +52,7 @@ k = ECDH(pk_Alice, sk_Bob) = ECDH(pk_Bob, sk_Alice)
 
 #### Step 2: Message encapsulation
 
-The encapsulation is easiest to describe on an example. Imagine wanting to transmit a 46 byte long payload. The payload itself is a suitably *encoded* plaintext message or a small file that Bob wants to transmit  (more information on encoding is provided Step 3 below).
+The encapsulation is easiest to describe on an example. Imagine wanting to transmit a 46 byte long payload. The payload itself is a suitably *encoded* plaintext message or a small file that Bob wants to transmit.
 
 ```
 |0                  |10                 |20                 |30                 |40
@@ -86,39 +86,52 @@ The encapsulation is easiest to describe on an example. Imagine wanting to trans
 
   The 8 bits of the header depend on the *length* `L` of the fragment (bits 1 - 5) and on the *encoding* `E` of the payload (bits 6 - 8). The first 5 bits of the header encode the fragment length:
 
-  | Length (L) | Header bits     | Description                                                |
+  | Length (L) | Header 1-5      | Description                                                |
   | ---------- | --------------- | ---------------------------------------------------------- |
   | 1 ... 31   | 00001 ... 11111 | Last fragment of the payload of size L                     |
-  | 0          | 00000           | Full size fragment, payload continues in the next fragment |
+  | 0          | 00000           | Full-size fragment, payload continues in the next fragment |
 
   The next 3 bits of the header encode the encoding:
 
-  | Encoding | Header bits | Description |
-  | -------- | ----------- | ----------- |
-  | 0        | 000         |             |
-  | 1        | 001         |             |
-  | 2        | 010         |             |
-  | 3        | 011         |             |
-  | 4        | 100         |             |
-  | 5        | 101         |             |
-  | 6        | 110         |             |
-  | 7        | 111         |             |
+  | Header 6-8 | Content | Description | Symbol rate                                    |
+  | ----------- | ------------------------- | ------------------------------------------------------------ | -------------------------- |
+  | 000 | binary                    | no encoding, raw 8-bit                                       | 31 B / fragment      |
+  | 001         | SMS TEXT                  | [GSM 03.38 charset]( ![GSM 03.38 character set](https://www.openmarket.com/docs/Content/Images/sms/characterset-gsm-characters.png)) | 35 characters / fragment |
+  | 010         | restricted uppercase TEXT | [Sixbit ASCII](http://catb.org/gpsd/AIVDM.html#_ais_payload_data_types) | 41 characters / fragment |
+  | 011         | TEXT                      | [smaz](https://github.com/antirez/smaz)/[smac](https://github.com/servalproject/smac/blob/master/README) compression | ~ 31 - 60 B / fragment |
+  | 100         |                           | RESERVED for future use                                      |                            |
+  | 101         |                           | RESERVED for future use                                      |                            |
+  | 110         |                           | RESERVED for future use                                      |                            |
+  | 111         |                           | RESERVED for future use                                      |                            |
 
+  For example, the headers of fragments the above hypothetical 46 B compression-encoded payload would like this:
+
+      |0 1 2 3 4 5 6 7|
+      ┌─┬─┬─┬─┬─┬─┬─┬─┐
+      |0 0 0 0 0|0 1 1|    header of Fragment 1
+      └─┴─┴─┴─┴─┴─┴─┴─┘
+      ┌─┬─┬─┬─┬─┬─┬─┬─┐
+      |0 1 1 1 1|0 1 1|    header of Fragment 2
+      └─┴─┴─┴─┴─┴─┴─┴─┘
+
+The combination of the header and the fragment will be called a block.
 
 #### Step 3: Encryption
 
-- Let's call `x` the padded and encapsulated payload (i.e plaintext).
+- Let's call `b_i` a (zero-padded, if required) block of the payload.
 
 - The initiation vector (nonce) is given by
 
-        IV = hash(sequence_number || pk_Bob || pk_Alice)
+        IV = hash(pk_Bob || pk_Alice) || sequence_number
 
     where `sequence_number` is the sequential and increasing number attached to each transaction of a given Stellar address. The operator `||` above stands for string concatenation. 
-    This construction assures that `IV` is always unique. For example, if Alice want's to send a message to bob, the order of public keys must be reversed. Even if Alice sends Bob the exact same plaintext message with an equal sequence number (the sequence number is only guaranteed to be unique for each address separately), the `IV` will still be different.
+    This construction assures that `IV` is unique and direction-dependent. For example, if Alice want's to send a message to bob, the order of public keys must be reversed. Even if Alice sends Bob the exact same plaintext message with an equal sequence number (the sequence number is only guaranteed to be unique for each Stellar address separately), the `IV` will be different.
 
-    The encrypted payload will then be
+    The encrypted block will then be
 
-        c = AES(x, IV, k)
+        c_i = AES(b_i, IV, k)
+
+    With the construction of the `IV` we have essentially selected the [CTR](https://en.wikipedia.org/wiki/Block_cipher_mode_of_operation#Counter_(CTR)) mode of operation for AES. 
 
 - *Optional:* It is also possible to chain multiple encryptions (even though I don't think that is necessary, AES should provide plenty of security margin). In this case we need to extend the 256-bit shared secret to more, e.g. 512, bits using a suitable Key Derivation Function
 
@@ -126,21 +139,26 @@ The encapsulation is easiest to describe on an example. Imagine wanting to trans
 
     The first encryption round (using AES-256) is then
 
-        c' = AES(x, IV, k1)
+        c_i' = AES(b_i, IV, k1)
 
     and the second encryption round (for example, using Twofish)
 
-        c = Twofish(c', IV, k2)
+        c_i = Twofish(c_i', IV, k2)
 
 
 
 #### Step 4: Sending the message
 
-The final encrypted message `c` is set as the 32 byte `MEMO_HASH` field of the Stellar transaction object. A payment transaction is constructed (e.g. using the 0.0000001 XLM minimum amount). The total cost in this case will be 0.00000101 XLM per message block (the total cost is the sum of the transaction fee and the payment amount).
+The encrypted blocks `b_i` are set to the 32 byte `MEMO_HASH` field of the Stellar transaction object. A payment transaction is constructed (e.g. using the 0.0000001 XLM minimum amount). The total cost in this case will be 0.00000101 XLM per fragment (the total cost is the sum of the transaction fee and the payment amount). The transactions for all message fragments are executed sequentially with consecutive sequence numbers.
 
-#### Step 5: Decryption
+#### Step 5: Decryption, Assembly, Extraction and Decoding
 
-Perform the respective inverse operations as during encryption.
+Basically, for receiving the message, the corresponding inverse operations of steps 1-4 are performed at the receiving site in the opposite order: 
+
+- the encrypted blocks are decrypted
+- and assembled into the encapsulated payload,
+- the payload is then extracted, 
+- and finally decoded.
 
 ## Proof of concept
 
