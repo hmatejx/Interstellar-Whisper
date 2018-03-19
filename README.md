@@ -93,16 +93,17 @@ The encapsulation is easiest to describe on an example. Imagine wanting to trans
 
   The next 3 bits of the header encode the encoding:
 
+
   | Header 6-8 | Content | Description | Symbol rate                                    |
   | ----------- | ------------------------- | ------------------------------------------------------------ | -------------------------- |
   | 000 | binary                    | no encoding, raw 8-bit                                       | 31 B / fragment      |
   | 001         | SMS TEXT                  | [GSM 03.38 charset](https://www.openmarket.com/docs/Content/Images/sms/characterset-gsm-characters.png) | 35 characters / fragment |
   | 010         | restricted uppercase TEXT | [Sixbit ASCII](http://catb.org/gpsd/AIVDM.html#_ais_payload_data_types) | 41 characters / fragment |
   | 011         | TEXT                      | [smaz](https://github.com/antirez/smaz)/[smac](https://github.com/servalproject/smac/blob/master/README) compression | ~ 31 - 60 B / fragment |
-  | 100         |                           | RESERVED for future use                                      |                            |
-  | 101         |                           | RESERVED for future use                                      |                            |
-  | 110         |                           | RESERVED for future use                                      |                            |
-  | 111         |                           | RESERVED for future use                                      |                            |
+  | 100         | RESERVED for future use |||
+  | 101         | RESERVED for future use |||
+  | 110         | RESERVED for future use |||
+  | 111         | RESERVED for future use |||
 
   For example, the headers of fragments the above hypothetical 46 B compression-encoded payload would like this:
 
@@ -149,16 +150,11 @@ The combination of the header and the fragment will be called a block.
 
 #### Step 4: Sending the message
 
-The encrypted blocks `b_i` are set to the 32 byte `MEMO_HASH` field of the Stellar transaction object. A payment transaction is constructed (e.g. using the 0.0000001 XLM minimum amount). The total cost in this case will be 0.00000101 XLM per fragment (the total cost is the sum of the transaction fee and the payment amount). The transactions for all message fragments are executed sequentially with consecutive sequence numbers.
+The encrypted blocks `c_i` are set to the 32 byte `MEMO_HASH` field of the Stellar transaction object. A payment transaction is constructed (e.g. using the 0.0000001 XLM minimum amount). The total cost in this case will be 0.00000101 XLM per fragment (the total cost is the sum of the transaction fee and the payment amount). The transactions for all message fragments are executed sequentially with consecutive sequence numbers.
 
 #### Step 5: Decryption, Assembly, Extraction and Decoding
 
-Basically, for receiving the message, the corresponding inverse operations of steps 1-4 are performed at the receiving site in the opposite order: 
-
-- the encrypted blocks are decrypted
-- and assembled into the encapsulated payload,
-- the payload is then extracted, 
-- and finally decoded.
+Basically, for receiving the message, the corresponding inverse operations of steps 1-4 are performed at the receiving site in the opposite order: the encrypted blocks are decrypted and assembled into the payload (removing the headers and padding), and finally the payload is decoded.
 
 ## Proof of concept
 
