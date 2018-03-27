@@ -8,7 +8,7 @@ This project holds the development of covert  messaging over the distributed [St
 
 ## Introduction
 
-Previous attempts at ubiquitous encryption, such as the *Web of trust* concepts of PGP/GPG, PKI, and DNSSEC have been (and to some extent still are) hampered by a lack of proper incentives. Security just isn't considered a must-have in the eyes of a typical user. 
+Previous attempts at ubiquitous encryption, such as the *Web of trust* concepts of PGP/GPG, PKI, and DNSSEC have been (and to some extent still are) hampered by a lack of proper incentives. Security just isn't considered a must-have in the eyes of a typical user.
 
 For example, I still remember myself trying to use GPG with some discipline approximately 10 years ago, only to lose sync of the public keys of my contacts, and eventually losing my own keys at some point. I didn't even bother to recover them. I had nothing to loose. My interactions continued un-encrypted. Eventually, even the most enthusiastic of my contacts gave up.
 
@@ -28,9 +28,9 @@ A break of any of the above would at the same time mean a break of the underlyin
 
 ## Using the distributed Stellar network as a vehicle for transporting messages
 
-From the various cryptocurrencies that I am familiar with, I could not find a better candidate than Stellar (XLM) for this project. 
+From the various cryptocurrencies that I am familiar with, I could not find a better candidate than Stellar (XLM) for this project.
 
-Stellar has one of the best [developer ecosystems](https://www.stellar.org/developers/) that I have looked at. There are official SDK libraries available for [Java](https://github.com/stellar/java-stellar-sdk), [JavaScript](https://www.stellar.org/developers/js-stellar-sdk/reference/), [Ruby](https://github.com/stellar/ruby-stellar-sdk) and [Go](https://github.com/stellar/go) with excellent documentation. Further community SDKs for [Python](https://github.com/StellarCN/py-stellar-base), [C#](https://github.com/QuantozTechnology/csharp-stellar-base), and [C++](https://github.com/bnogalm/StellarQtSDK) are also available. 
+Stellar has one of the best [developer ecosystems](https://www.stellar.org/developers/) that I have looked at. There are official SDK libraries available for [Java](https://github.com/stellar/java-stellar-sdk), [JavaScript](https://www.stellar.org/developers/js-stellar-sdk/reference/), [Ruby](https://github.com/stellar/ruby-stellar-sdk) and [Go](https://github.com/stellar/go) with excellent documentation. Further community SDKs for [Python](https://github.com/StellarCN/py-stellar-base), [C#](https://github.com/QuantozTechnology/csharp-stellar-base), and [C++](https://github.com/bnogalm/StellarQtSDK) are also available.
 
 Transactions are also very fast (resolve in 2 - 5 seconds) and cheap (100 stroops ~ 0.000003 USD at the time of writing). Decentralization and the size of the network continue to increase and there is currently no end in sight. But the most important criterion is, in my opinion, the open-mindedness of the [Stellar Development Foundation](www.stellar.org).
 
@@ -44,7 +44,7 @@ Let's call these Curve25519 keys `sk_Bob, pk_Bob, sk_Alice, and pk_Alice`.
 
 #### Step 1: Diffie-Hellman
 
-Bob's calculates the shared secret by using his secret key and Alice's public key using the `ECDH` algorithm. Alice does the same calculation using her secret key and Bob's public key.  Let's call this shared 256-bit secret value `k`, 
+Bob calculates the shared secret by using his secret key and Alice's public key using the `ECDH` algorithm. Alice does the same calculation using her secret key and Bob's public key.  Let's call this shared 256-bit secret value `k`,
 
 ```
 k = ECDH(pk_Alice, sk_Bob) = ECDH(pk_Bob, sk_Alice)
@@ -64,7 +64,7 @@ The encapsulation is easiest to describe on an example. Imagine wanting to trans
 
 1. The first step of encapsulation is to split the payload into fragments of maximum length of 31 bytes, resulting in two fragments of lengths of 31 and 15.
 
-       |0                  |10                 |20                 |30 
+       |0                  |10                 |20                 |30
        |0 1 2 3 4 5 6 7 8 9|0 1 2 3 4 5 6 7 8 0|1 2 3 4 5 6 7 8 9 0|1
        ┌─┬─┬─┬─┬─┬─┬─┬─┬─┬─┬─┬─┬─┬─┬─┬─┬─┬─┬─┬─┬─┬─┬─┬─┬─┬─┬─┬─┬─┬─┬─┐
        | Fragment 1                                         31 bytes |
@@ -75,7 +75,7 @@ The encapsulation is easiest to describe on an example. Imagine wanting to trans
 
 2. Next, a 1 byte header `H` is attached to each fragment
 
-       |0                  |10                 |20                 |30 
+       |0                  |10                 |20                 |30
        |0 1 2 3 4 5 6 7 8 9|0 1 2 3 4 5 6 7 8 0|1 2 3 4 5 6 7 8 9 0|1 2
        ┌─┬─┬─┬─┬─┬─┬─┬─┬─┬─┬─┬─┬─┬─┬─┬─┬─┬─┬─┬─┬─┬─┬─┬─┬─┬─┬─┬─┬─┬─┬─┬─┐
        |H| Fragment 1                                1 + 31 = 32 bytes |
@@ -125,14 +125,15 @@ The combination of the header and the fragment will be called a block.
 
         IV = hash(pk_Bob || pk_Alice) || sequence_number
 
-    where `sequence_number` is the sequential and increasing number attached to each transaction of a given Stellar address. The operator `||` above stands for string concatenation. 
+    where `sequence_number` is the sequential and increasing number attached to each transaction of a given Stellar address. The operator `||` above stands for string concatenation.
     This construction assures that `IV` is unique and direction-dependent. For example, if Alice want's to send a message to bob, the order of public keys must be reversed. Even if Alice sends Bob the exact same plaintext message with an equal sequence number (the sequence number is only guaranteed to be unique for each Stellar address separately), the `IV` will be different.
 
     The encrypted block will then be
 
         c_i = AES(b_i, IV, k)
 
-    With the construction of the `IV` we have essentially selected the [CTR](https://en.wikipedia.org/wiki/Block_cipher_mode_of_operation#Counter_(CTR)) mode of operation for AES. 
+
+    With the construction of the `IV` we have essentially selected the [CTR](https://en.wikipedia.org/wiki/Block_cipher_mode_of_operation#Counter_(CTR)) mode of operation for AES.
 
 - *Optional:* It is also possible to chain multiple encryptions (even though I don't think that is necessary, AES should provide plenty of security margin). In this case we need to extend the 256-bit shared secret to more, e.g. 512, bits using a suitable Key Derivation Function
 
@@ -160,7 +161,7 @@ Basically, for receiving the message, the corresponding inverse operations of st
 
 **TODO: this below is the old approach using the `libsodium` functions**
 
-Bob wants to send a message to Alice. Bob and Alice are both users of the Stellar network, and have their public keys published within the distributed ledger. 
+Bob wants to send a message to Alice. Bob and Alice are both users of the Stellar network, and have their public keys published within the distributed ledger.
 
 Since they also both own their respective secret keys, this allows Bob to send Alice a message using public key cryptography. Specifically the Sealed Box concept is relevant here as it provides encryption with an ephemeral key which cannot be recovered by Bob. The Alice is the only person that can now decipher the received message.
 
@@ -169,7 +170,7 @@ The message itself is sent in chunks using the `MEMO_HASH` field of the Stellar 
 Below is a test showing Bob submitting a secret message to Alice.
 
 ```
-$ python3 bob.py 
+$ python3 bob.py
 [Message for Alice]─────────────────────────────────────────────────────
 Hello world!
 [END Message]───────────────────────────────────────────────────────────
@@ -178,7 +179,7 @@ Hello world!
 Alice can indeed decrypt the message.
 
 ```
-$ python3 alice.py 
+$ python3 alice.py
 [Message from Bob]──────────────────────────────────────────────────────
 Hello world!
 [END Message]───────────────────────────────────────────────────────────
