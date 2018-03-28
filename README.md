@@ -121,12 +121,11 @@ The combination of the header and the fragment will be called a block.
 
 - Let's call `b_i` a (zero-padded, if required) block of the payload.
 
-- The initiation vector (nonce) is given by
+- The initiation vector (nonce) is given by the binary sum of the first 16 bytes of Alice's public key,
 
-        IV = hash(pk_Bob || pk_Alice) || sequence_number
+        IV = (pk_Alice[0:16] + sequence_number)[-16:]
 
-    where `sequence_number` is the sequential and increasing number attached to each transaction of a given Stellar address. The operator `||` above stands for string concatenation.
-    This construction assures that `IV` is unique and direction-dependent. For example, if Alice want's to send a message to bob, the order of public keys must be reversed. Even if Alice sends Bob the exact same plaintext message with an equal sequence number (the sequence number is only guaranteed to be unique for each Stellar address separately), the `IV` will be different.
+    Here `sequence_number` is the sequential and increasing number attached to the transaction and incremented in Bob's account after the transaction has been settled. This construction assures that `IV` is unique and direction-dependent. If Alice send Bob a message, the `IV` will be given by the sum of *Bob's* public key and the `sequence_number` of *Alice's* acount. Never reusing the same `IV` is critically important. Failing to do so would catastrophically compromise the encryption (remember both Alice and Bob share the same secret `k`). With the proposed `IV` construction, even if Alice sends Bob the exact same plaintext message within a transaction with the exact same `sequence_number` (the sequence number is only guaranteed to be unique for each Stellar account separately), the `IV` is guaranteed to be different.
 
     The encrypted block will then be
 

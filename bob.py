@@ -3,7 +3,6 @@
 # stellar-base
 from stellar_base.address import Address
 from stellar_base.keypair import Keypair
-from stellar_base.builder import Builder
 from stellar_base.utils import StellarMnemonic
 # Stellar Whisper
 from whisper import Whisperer
@@ -21,4 +20,4 @@ assert MyAddress == kp.address().decode()
 Alice = "GCU2RRJHYBEIP6R6SJHLTCC32FVFGATYMTYB3ZBKT3OMPZLCTVSS7ZDH"
 
 W = Whisperer(kp)
-W.Send(Alice, "Hi Alice!")
+W.Send(Alice, 'Lorem ipsum dolor sit amet, consectetur adipiscing elit'.encode())
