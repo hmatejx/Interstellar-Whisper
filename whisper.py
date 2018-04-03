@@ -169,4 +169,4 @@ class Whisperer:
         encrypted = Whisperer.__encrypt(blocks, k, IV)
         DumpEncrypted(encrypted)
 
-        self.__send(address, blocks, sequence_number)
+        self.__send(address, encrypted, sequence_number)
