@@ -105,7 +105,7 @@ The encapsulation is easiest to describe on an example. Imagine wanting to trans
   | 110         | RESERVED for future use |||
   | 111         | RESERVED for future use |||
 
-  For example, the headers of fragments the above hypothetical 46 B compression-encoded payload would like this:
+  For example, the  headers of the above hypothetical 46 B compression-encoded payload would like this:
 
       |0 1 2 3 4 5 6 7|
       ┌─┬─┬─┬─┬─┬─┬─┬─┐
@@ -150,7 +150,7 @@ The combination of the header and the fragment will be called a block.
 
 #### Step 4: Sending the message
 
-The encrypted blocks `c_i` are set to the 32 byte `MEMO_HASH` field of the Stellar transaction object. A payment transaction is constructed (e.g. using the 0.0000001 XLM minimum amount). The total cost in this case will be 0.00000101 XLM per fragment (the total cost is the sum of the transaction fee and the payment amount). The transactions for all message fragments are executed sequentially with consecutive sequence numbers.
+The encrypted blocks `c_i` are set to the 32 byte `MEMO_HASH` field of the Stellar transaction object. A payment transaction is constructed (e.g. using the 0.0000001 XLM minimum amount). The total cost in this case will be 0.0000101 XLM per fragment (the total cost is the sum of the transaction fee and the payment amount). The transactions for all message fragments are executed sequentially with consecutive sequence numbers.
 
 #### Step 5: Decryption, Assembly, Extraction and Decoding
 
