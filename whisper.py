@@ -7,8 +7,7 @@ from nacl.signing import SigningKey, VerifyKey
 from nacl.bindings import crypto_box_beforenm
 from Crypto.Cipher import AES
 import base64
-#import json
-#import requests
+import pprint
 
 
 __all__ = ['Whisperer']
@@ -26,8 +25,9 @@ def DumpBlocks(blocks):
     for i in range(0, len(blocks)):
         h = bin(blocks[i][0])[2:]
         h = '0' * (8 - len(h)) + h
-        f = blocks[i][1:]
-        print("{0}|{1}|{2}".format(h[0:5], h[5:8], f.decode()))
+        fb = blocks[i][1:]
+        fa = ''.join([s if ord(s) < 127 and ord(s) > 31 else ' ' for s in fb.decode('ascii', errors='ignore')])
+        print("{0}|{1}|{2} {3}".format(h[0:5], h[5:8], base64.b16encode(fb).decode(), fa))
     print('────────────────────────────────────────────────────────────────────────────────────────')
 
 
@@ -39,18 +39,6 @@ def DumpEncrypted(encrypted):
     for i in range(0, len(encrypted)):
        print("{}".format(base64.b16encode(encrypted[i]).decode()))
     print('────────────────────────────────────────────────────────────────────────────────────────')
-
-
-def ed25519_pk_to_curve25519_pk(pk):
-    '''
-    '''
-    return VerifyKey(pk).to_curve25519_public_key()._public_key
-
-
-def ed25519_sk_to_curve25519_pk(sk):
-    '''
-    '''
-    return SigningKey(sk).to_curve25519_private_key()._private_key
 
 
 class Whisperer:
@@ -66,8 +54,17 @@ class Whisperer:
             Instance of the object.
         '''
         self.__kp = kp
-        self.__sk = ed25519_sk_to_curve25519_pk(kp.raw_seed())
-        self.__pk = ed25519_pk_to_curve25519_pk(kp.raw_public_key())
+        self.__sk = SigningKey(kp.raw_seed()).to_curve25519_private_key()._private_key
+        self.__pk = VerifyKey(kp.raw_public_key()).to_curve25519_public_key()._public_key
+        self.__address = kp.address().decode()
+        self.__seed = kp.seed().decode()
+
+
+    @classmethod
+    def __addressToPk(cls, address):
+        '''
+        '''
+        return VerifyKey(decode_check('account', address)).to_curve25519_public_key()._public_key
 
 
     @classmethod
@@ -97,7 +94,7 @@ class Whisperer:
             enc: The desired encoding.
 
         Returns:
-            The encoded message (TODO: currently just returns).
+            The encoded message.
         '''
         # step 1: split the message into fragments of at most 31 bytes
         fragments = [msg[i:i + 31] for i in range(0, len(msg), 31)]
@@ -112,16 +109,54 @@ class Whisperer:
 
 
     @classmethod
-    def __encrypt(cls, blocks, k, IV):
+    def __encrypt(cls, blocks, k, baseIV):
         '''
         '''
         encrypted = []
         for i in range(0, len(blocks)):
-            iv = (int.from_bytes(IV, 'big') + i).to_bytes(17, 'big')[-16:]
+            iv = (int.from_bytes(baseIV, 'big') + i).to_bytes(17, 'big')[-16:]
             cypher = AES.new(k, AES.MODE_CBC, iv)
             encrypted += [cypher.encrypt(blocks[i])]
 
         return encrypted
+
+
+    @classmethod
+    def __decrypt(cls, encrypted, k, IV):
+        '''
+        '''
+        cypher = AES.new(k, AES.MODE_CBC, IV)
+        decrypted = cypher.decrypt(encrypted)
+
+        return decrypted
+
+
+    @classmethod
+    def __getLength(cls, block):
+        '''
+        __getLength
+
+        Args:
+            block: block containing an encapsulated message fragment
+
+        Returns:
+            The length of the encapsulated fragment.
+        '''
+        return block[0] >> 3
+
+
+    @classmethod
+    def __getEncoding(cls, block):
+        '''
+        __getEncoding
+
+        Args:
+            block: block containing an encapsulated message fragment
+
+        Returns:
+            The message fragment encoding format.
+        '''
+        return block[0] &  7
 
 
     def __send(self, address, blocks, sequence_number):
@@ -129,11 +164,28 @@ class Whisperer:
         '''
         for i in range(0, len(blocks)):
             sequence = str(sequence_number + i)
-            builder = Builder(secret = self.__kp.seed().decode(), sequence = sequence)
+            builder = Builder(secret = self.__seed, sequence = sequence)
             builder.append_payment_op(address, '0.0000001', 'XLM')
             builder.add_hash_memo(blocks[i])
             builder.sign()
             builder.submit()
+
+
+    def __shared(self, address):
+        '''
+        __shared
+
+        Args:
+            address: Stellar address of the counterparty.
+
+        Returns:
+            The shared secred according to ed25519.
+        '''
+        pk = Whisperer.__addressToPk(address)
+        k = crypto_box_beforenm(pk, self.__sk)
+        #print('\nShared secret = {}'.format(base64.b16encode(k).decode()))
+
+        return k
 
 
     def Send(self, address, msg, encoding = 0):
@@ -141,7 +193,7 @@ class Whisperer:
         Send
 
         Args:
-            address: This is the public Stellar address of your contact.
+            address: This is the public Stellar address of your receiver.
             message: The message (bytes) that you want to trasmit.
 
         Returns:
@@ -156,17 +208,68 @@ class Whisperer:
         DumpBlocks(blocks)
 
         # calculate shared secret
-        pk = ed25519_pk_to_curve25519_pk(decode_check('account', address))
-        k = crypto_box_beforenm(pk, self.__sk)
-        print('\nShared secret = {}'.format(base64.b16encode(k).decode()))
+        k = self.__shared(address)
 
         # obtain the account sequence number
-        sequence_number = int(horizon.account(self.__kp.address().decode()).get('sequence'))
+        sequence_number = int(horizon.account(self.__address).get('sequence'))
+
+        # build the IV
+        pk = Whisperer.__addressToPk(address)
         IV = (int.from_bytes(pk[0:16], 'big') + sequence_number).to_bytes(17, 'big')[-16:]
-        print('Base IV = {}'.format(base64.b16encode(IV).decode()))
+        #print('Base IV = {}'.format(base64.b16encode(IV).decode()))
 
         # encrypt
         encrypted = Whisperer.__encrypt(blocks, k, IV)
         DumpEncrypted(encrypted)
 
         self.__send(address, encrypted, sequence_number)
+
+
+    def Read(self, address, tail = 1, cursor = None):
+        '''
+        Read
+
+        Args:
+            address: This is the public Stellar address of the sender.
+            tail: Read n = `tail` last messages.
+            cursor:  Read all messages received after this sequence number.
+        '''
+
+        # Get all transactions
+        tr = horizon.account_transactions(self.__address, params = {'order': 'desc', 'limit': 100}).get('_embedded').get('records')
+
+        # filter out only transations from specified address and with memo type = hash
+        tr = [t for t in tr if t.get('source_account') == address and t.get('memo_type') == 'hash']
+        #pprint.pprint(tr)
+
+        # calculate shared secret
+        k = self.__shared(address)
+
+        # decrypt memo blocks until a message is found
+        messages = []
+        nfound = 0
+        for t in tr:
+            # get the transaction sequence number
+            sequence_number = int(t.get('source_account_sequence'))
+
+            # build the IV and decrypt
+            pk = Whisperer.__addressToPk(self.__address)
+            IV = (int.from_bytes(pk[0:16], 'big') + sequence_number).to_bytes(17, 'big')[-16:]
+            encrypted = base64.b64decode(t.get('memo'))
+            block = Whisperer.__decrypt(encrypted, k, IV)
+
+            # check if we have found the message
+            l = Whisperer.__getLength(block)
+            if l == 0:
+                if len(messages) == 0:
+                    continue
+                messages[len(messages)-1].append(block[1:])
+            if l > 0:
+                nfound += 1
+                if (nfound > tail):
+                    break
+                messages.append([block[1:(l+1)]])
+
+        messages = [b''.join(reversed(m)) for m in messages]
+
+        return messages

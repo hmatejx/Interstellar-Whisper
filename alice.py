@@ -21,4 +21,7 @@ assert MyAddress == kp.address().decode()
 Bob = "GD2TA2JCQTM6ILRQB2JL3GIZSUKHVU5MDJSHRLM7VMNORLT6SZB72TIY"
 
 W = Whisperer(kp)
-W.Send(Bob, "Hi Alice!")
+
+# Read last message
+msg = W.Read(address = Bob, tail = 1)
+print(msg)
