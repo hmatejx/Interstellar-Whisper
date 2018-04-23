@@ -84,6 +84,13 @@ class Whisperer:
 
 
     @classmethod
+    def __decode(cls, msg, enc):
+        '''
+        '''
+        return ''.join([s if ord(s) < 127 and ord(s) > 31 else ' ' for s in msg.decode('utf-8', errors='ignore')])
+
+
+    @classmethod
     def __encapsulate(cls, msg, encoding = 0):
         '''
         Encapsulate the message using the required encoding,
@@ -250,7 +257,7 @@ class Whisperer:
         nfound = 0
         for t in tr:
             # get the transaction sequence number
-            sequence_number = int(t.get('source_account_sequence'))
+            sequence_number = int(t.get('source_account_sequence')) - 1
 
             # build the IV and decrypt
             pk = Whisperer.__addressToPk(self.__address)

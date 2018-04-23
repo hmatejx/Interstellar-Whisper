@@ -1,11 +1,25 @@
 #!/usr/bin/python3
 
+'''bob
+
+Usage:
+  bob.py -m MSG
+  bob.py (-h | --help)
+  bob.py --version
+
+Options:
+  -h --help     Show this screen.
+  -m MSG        The message string.
+'''
+from docopt import docopt
+
 # stellar-base
 from stellar_base.address import Address
 from stellar_base.keypair import Keypair
 from stellar_base.utils import StellarMnemonic
 # Stellar Whisper
 from whisper import Whisperer
+
 
 # Create Bob's keypair
 sm = StellarMnemonic("english")
@@ -20,4 +34,13 @@ assert MyAddress == kp.address().decode()
 Alice = "GCU2RRJHYBEIP6R6SJHLTCC32FVFGATYMTYB3ZBKT3OMPZLCTVSS7ZDH"
 
 W = Whisperer(kp)
-W.Send(Alice, 'Lorem ipsum dolor sit amet, consectetur adipiscing elit'.encode())
+
+
+if __name__ == '__main__':
+
+    # Get cmdline arguments
+    arguments = docopt(__doc__, version = 'bob 0.1')
+    msg = arguments.get('-m')
+
+    # Send message
+    W.Send(Alice, msg.encode())
