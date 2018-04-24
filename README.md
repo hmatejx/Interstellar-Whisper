@@ -182,5 +182,6 @@ Last 1 message(s)...
 ## TODO
 - [ ] Implement password-protection of the seed file.
 - [ ] Implement the defined message encodings.
+- [ ] Integrate federation adress handling.
 - [ ] Make the implementation clener (refactor).
 - [ ] Provide library for integrating into wallet software.
