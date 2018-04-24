@@ -105,7 +105,7 @@ The encapsulation is easiest to describe on an example. Imagine wanting to trans
   | 110         | RESERVED for future use |||
   | 111         | RESERVED for future use |||
 
-  For example, the  headers of the above hypothetical 46 B compression-encoded payload would like this:
+  For example, the headers of fragments the above hypothetical 46 B compression-encoded payload would like this:
 
       |0 1 2 3 4 5 6 7|
       ┌─┬─┬─┬─┬─┬─┬─┬─┐
@@ -150,7 +150,7 @@ The combination of the header and the fragment will be called a block.
 
 #### Step 4: Sending the message
 
-The encrypted blocks `c_i` are set to the 32 byte `MEMO_HASH` field of the Stellar transaction object. A payment transaction is constructed (e.g. using the 0.0000001 XLM minimum amount). The total cost in this case will be 0.0000101 XLM per fragment (the total cost is the sum of the transaction fee and the payment amount). The transactions for all message fragments are executed sequentially with consecutive sequence numbers.
+The encrypted blocks `c_i` are set to the 32 byte `MEMO_HASH` field of the Stellar transaction object. A payment transaction is constructed (e.g. using the 0.0000001 XLM minimum amount). The total cost in this case will be 0.00000101 XLM per fragment (the total cost is the sum of the transaction fee and the payment amount). The transactions for all message fragments are executed sequentially with consecutive sequence numbers.
 
 #### Step 5: Decryption, Assembly, Extraction and Decoding
 
@@ -158,37 +158,25 @@ Basically, for receiving the message, the corresponding inverse operations of st
 
 ## Proof of concept
 
-**TODO: this below is the old approach using the `libsodium` functions**
-
-Bob wants to send a message to Alice. Bob and Alice are both users of the Stellar network, and have their public keys published within the distributed ledger.
-
-Since they also both own their respective secret keys, this allows Bob to send Alice a message using public key cryptography. Specifically the Sealed Box concept is relevant here as it provides encryption with an ephemeral key which cannot be recovered by Bob. The Alice is the only person that can now decipher the received message.
-
-The message itself is sent in chunks using the `MEMO_HASH` field of the Stellar transaction (providing 32 bytes of transport spate for packet fragmentation).
-
-Below is a test showing Bob submitting a secret message to Alice.
+Bob can send a message to Alice (identified by this address GCU2RRJHYBEIP6R6SJHLTCC32FVFGATYMTYB3ZBKT3OMPZLCTVSS7ZDH):
 
 ```
-$ python3 bob.py
-[Message for Alice]─────────────────────────────────────────────────────
-Hello world!
-[END Message]───────────────────────────────────────────────────────────
+$./whisper.py -s "Wow! A message through Stellar!" -a GCU2RRJHYBEIP6R6SJHLTCC32FVFGATYMTYB3ZBKT3OMPZLCTVSS7ZDH -k .bob_wallet
+$ whisper.py -m
+Enter password: 
+Sending message to GCU2RRJHYBEIP6R6SJHLTCC32FVFGATYMTYB3ZBKT3OMPZLCTVSS7ZDH...
+Done.
 ```
 
-Alice can indeed decrypt the message.
+Alice can indeed read the message.
 
 ```
-$ python3 alice.py
-[Message from Bob]──────────────────────────────────────────────────────
-Hello world!
-[END Message]───────────────────────────────────────────────────────────
+./whisper.py -r -n 1 -k .alice_wallet
+Enter password: 
+Last 1 message(s)...
+  1) Wow! A message through Stellar!
 ```
 
-The two fragments of the above transaction can be seen on Stellar test-net:
-
-http://testnet.stellarchain.io/tx/7722aa6ebf4e6fb47a8b0d33ad025173f7e1753f7252cf8c5372e7b0dfaafeb5
-
-http://testnet.stellarchain.io/tx/53f75829261447ef4a1ee581649d7301a5938bfbc8df290fc16a4e66139fee51
 
 ## TODO
-Think about a suitable hash for IV generation, suitable KDF for key extension in case of chaining multiple encryptions, and in general think carefully about the security of the above 'roll-your-own' crypto... **this is always a VERY bad thing to do!**
+- [] Implement password-protection of the seed files.

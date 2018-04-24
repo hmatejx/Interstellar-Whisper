@@ -16,6 +16,9 @@ __all__ = ['Whisperer']
 # This creates a new Horizon Livenet instance
 horizon = horizon_testnet()
 
+# Set to non-zero for debugging
+DEBUG = 0
+
 
 def DumpBlocks(blocks):
     '''
@@ -190,7 +193,8 @@ class Whisperer:
         '''
         pk = Whisperer.__addressToPk(address)
         k = crypto_box_beforenm(pk, self.__sk)
-        #print('\nShared secret = {}'.format(base64.b16encode(k).decode()))
+        if DEBUG:
+            print('\nShared secret = {}'.format(base64.b16encode(k).decode()))
 
         return k
 
@@ -212,7 +216,8 @@ class Whisperer:
 
         # encapsulate message
         blocks = Whisperer.__encapsulate(encoded, encoding)
-        DumpBlocks(blocks)
+        if DEBUG > 0:
+            DumpBlocks(blocks)
 
         # calculate shared secret
         k = self.__shared(address)
@@ -223,16 +228,18 @@ class Whisperer:
         # build the IV
         pk = Whisperer.__addressToPk(address)
         IV = (int.from_bytes(pk[0:16], 'big') + sequence_number).to_bytes(17, 'big')[-16:]
-        #print('Base IV = {}'.format(base64.b16encode(IV).decode()))
+        if DEBUG:
+            print('Base IV = {}'.format(base64.b16encode(IV).decode()))
 
         # encrypt
         encrypted = Whisperer.__encrypt(blocks, k, IV)
-        DumpEncrypted(encrypted)
+        if DEBUG > 0:
+            DumpEncrypted(encrypted)
 
         self.__send(address, encrypted, sequence_number)
 
 
-    def Read(self, address, tail = 1, cursor = None):
+    def Read(self, address = None, tail = 1, cursor = None):
         '''
         Read
 
@@ -246,17 +253,20 @@ class Whisperer:
         tr = horizon.account_transactions(self.__address, params = {'order': 'desc', 'limit': 100}).get('_embedded').get('records')
 
         # filter out only transations from specified address and with memo type = hash
-        tr = [t for t in tr if t.get('source_account') == address and t.get('memo_type') == 'hash']
-        #pprint.pprint(tr)
-
-        # calculate shared secret
-        k = self.__shared(address)
+        tr = [t for t in tr if (t.get('source_account') == address or address is None) \
+                                and t.get('memo_type') == 'hash']
 
         # decrypt memo blocks until a message is found
         messages = []
         nfound = 0
         for t in tr:
-            # get the transaction sequence number
+            # get the transaction source address
+            address = t.get('source_account')
+
+            # calculate shared secret
+            k = self.__shared(address)
+
+            # get sequence number
             sequence_number = int(t.get('source_account_sequence')) - 1
 
             # build the IV and decrypt
@@ -280,3 +290,21 @@ class Whisperer:
         messages = [b''.join(reversed(m)) for m in messages]
 
         return messages
+
+
+    @classmethod
+    def ValidateAddress(cls, address):
+        '''
+        '''
+        try:
+            decode_check('account', address)
+            return True
+        except:
+            return False
+
+
+    @classmethod
+    def ValidateSeed(cls, seed):
+        '''
+        '''
+        return decode_check('seed', seed)

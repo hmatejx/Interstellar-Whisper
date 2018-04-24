@@ -101,3 +101,7 @@ ENV/
 .mypy_cache/
 
 .vscode
+
+.bob_wallet
+.alice_wallet
+
