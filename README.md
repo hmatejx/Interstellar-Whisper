@@ -22,7 +22,7 @@ In this project I propose using cryptocurrency keys for highly secure, persisten
 - **Authenticity**: message authenticity is guaranteed by the rules of the network.
 - **Resilience:** the network is decentralized, no single node to attack, making sending messages difficult to block (the only option is to completely block the client from the network).
 - **Persistency:** the history is immutable, distributed, and protected by the consensus protocol, which allows retrieving messages at any point in the future.
-- **Plausible deniability:** some protocols contain optional fields for hashes which are indistinguishable from encrypted messages and the sender himself cannot decode the sent messages if ephemeral key pairs were used.
+- **Plausible deniability (optional):** some protocols contain optional fields for hashes which are indistinguishable from encrypted messages and the sender himself cannot decode the sent messages if ephemeral key pairs were used.
 
 A break of any of the above would at the same time mean a break of the underlying cryptography, *breaking the network itself*. As such, cryptocurrencies will continue to evolve towards more secure algorithms when security margin become too low.
 
@@ -158,11 +158,12 @@ Basically, for receiving the message, the corresponding inverse operations of st
 
 ## Proof of concept
 
-Bob can send a message to Alice (identified by this address GCU2RRJHYBEIP6R6SJHLTCC32FVFGATYMTYB3ZBKT3OMPZLCTVSS7ZDH):
+The application is running on TESTNET at the moment, but that can easily be switched as soon as the security measures for protecting your seed are implemented (see TODO).
+
+Bob can send a message to Alice (identified by this address [GCU2RRJHYBEIP6R6SJHLTCC32FVFGATYMTYB3ZBKT3OMPZLCTVSS7ZDH](http://testnet.stellarchain.io/address/GCU2RRJHYBEIP6R6SJHLTCC32FVFGATYMTYB3ZBKT3OMPZLCTVSS7ZDH):
 
 ```
 $./whisper.py -s "Wow! A message through Stellar!" -a GCU2RRJHYBEIP6R6SJHLTCC32FVFGATYMTYB3ZBKT3OMPZLCTVSS7ZDH -k .bob_wallet
-$ whisper.py -m
 Enter password: 
 Sending message to GCU2RRJHYBEIP6R6SJHLTCC32FVFGATYMTYB3ZBKT3OMPZLCTVSS7ZDH...
 Done.
@@ -179,4 +180,7 @@ Last 1 message(s)...
 
 
 ## TODO
-- [] Implement password-protection of the seed files.
+- [ ] Implement password-protection of the seed file.
+- [ ] Implement the defined message encodings.
+- [ ] Make the implementation clener (refactor).
+- [ ] Provide library for integrating into wallet software.
