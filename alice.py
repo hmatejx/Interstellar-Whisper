@@ -18,7 +18,7 @@ from stellar_base.keypair import Keypair
 from stellar_base.builder import Builder
 from stellar_base.utils import StellarMnemonic
 # Stellar Whisper
-from whisper import Whisperer
+from whisperer import Whisperer
 
 
 # Create Alice's keypair
