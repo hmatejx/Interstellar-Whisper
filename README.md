@@ -6,6 +6,26 @@
 
 This [project](https://github.com/hmatejx/Interstellar-Whisper/) holds the development of covert  messaging over the distributed [Stellar](https://www.stellar.org) network.
 
+```
+$./whisper.py -h
+whisper.
+
+Usage:
+  whisper.py (-r [-n N] | -s MSG -a ADDR) [-k FILE]
+  whisper.py -h | --help
+  whisper.py -v | --version
+
+Options:
+  -r            Read messages.
+  -s MSG        The message text to send.
+  -a ADDR       The destination address (required for sending).
+  -n N          Read last N messages (optional for reading) [default: 1].
+  -k FILE       Path to the file containing the password-protected stellar
+                seed for your account [default: ~/.stellar/wallet].
+  -v --version  Display version and exit.
+  -h --help     Show this screen.
+```
+
 ## Introduction
 
 Previous attempts at ubiquitous encryption, such as the *Web of trust* concepts of PGP/GPG, PKI, and DNSSEC have been (and to some extent still are) hampered by a lack of proper incentives. Security just isn't considered a must-have in the eyes of a typical user.
@@ -160,7 +180,7 @@ Basically, for receiving the message, the corresponding inverse operations of st
 
 The application is running on TESTNET at the moment, but that can easily be switched as soon as the security measures for protecting your seed are implemented (see TODO).
 
-Bob can send a message to Alice (identified by this address [GCU2RRJHYBEIP6R6SJHLTCC32FVFGATYMTYB3ZBKT3OMPZLCTVSS7ZDH](http://testnet.stellarchain.io/address/GCU2RRJHYBEIP6R6SJHLTCC32FVFGATYMTYB3ZBKT3OMPZLCTVSS7ZDH):
+Bob can send a message to Alice (identified by this address [GCU2R...7ZDH](http://testnet.stellarchain.io/address/GCU2RRJHYBEIP6R6SJHLTCC32FVFGATYMTYB3ZBKT3OMPZLCTVSS7ZDH)):
 
 ```
 $./whisper.py -s "Wow! A message through Stellar!" -a GCU2RRJHYBEIP6R6SJHLTCC32FVFGATYMTYB3ZBKT3OMPZLCTVSS7ZDH -k .bob_wallet
@@ -172,7 +192,7 @@ Done.
 Alice can indeed read the message.
 
 ```
-./whisper.py -r -n 1 -k .alice_wallet
+$./whisper.py -r -n 1 -k .alice_wallet
 Enter password: 
 Last 1 message(s)...
   1) Wow! A message through Stellar!
@@ -180,8 +200,8 @@ Last 1 message(s)...
 
 
 ## TODO
-- [ ] Implement password-protection of the seed file.
+- [ ] Implement password protection for the seed file.
 - [ ] Implement the defined message encodings.
-- [ ] Integrate federation adress handling.
-- [ ] Make the implementation clener (refactor).
-- [ ] Provide library for integrating into wallet software.
+- [ ] Integrate federation address handling.
+- [ ] Make the implementation cleaner (refactor).
+- [ ] Provide a library, e.g. for integrating into wallet software.
