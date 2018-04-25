@@ -4,7 +4,7 @@
 
 ![](img/stars.jpg)
 
-This [project](https://github.com/hmatejx/Interstellar-Whisper/) holds the development of covert  messaging over the distributed [Stellar](https://www.stellar.org) network.
+This [project](https://github.com/hmatejx/Interstellar-Whisper/) holds the development of encrypted messaging over the distributed [Stellar](https://www.stellar.org) network.
 
 ```
 $./whisper.py -h
