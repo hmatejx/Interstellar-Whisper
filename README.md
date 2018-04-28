@@ -2,7 +2,7 @@
 
 *Sending whispers across the interstellar space!*
 
-![](img/stars.jpg)
+![stellar rocket in space](img/stars.jpg)
 
 This [project](https://github.com/hmatejx/Interstellar-Whisper/) holds the development of encrypted messaging over the distributed [Stellar](https://www.stellar.org) network.
 
@@ -113,7 +113,6 @@ The encapsulation is easiest to describe on an example. Imagine wanting to trans
 
   The next 3 bits of the header encode the encoding:
 
-
   | Header 6-8 | Content | Description | Symbol rate                                    |
   | ----------- | ------------------------- | ------------------------------------------------------------ | -------------------------- |
   | 000 | binary                    | no encoding, raw 8-bit                                       | 31 B / fragment      |
@@ -151,7 +150,6 @@ The combination of the header and the fragment will be called a block.
 
         c_i = AES(b_i, IV, k)
 
-
     With the construction of the `IV` we have essentially selected the [CTR](https://en.wikipedia.org/wiki/Block_cipher_mode_of_operation#Counter_(CTR)) mode of operation for AES.
 
 - *Optional:* It is also possible to chain multiple encryptions (even though I don't think that is necessary, AES should provide plenty of security margin). In this case we need to extend the 256-bit shared secret to more, e.g. 512, bits using a suitable Key Derivation Function
@@ -165,8 +163,6 @@ The combination of the header and the fragment will be called a block.
     and the second encryption round (for example, using Twofish)
 
         c_i = Twofish(c_i', IV, k2)
-
-
 
 #### Step 4: Sending the message
 
@@ -184,7 +180,7 @@ Bob can send a message to Alice (identified by this address [GCU2R...7ZDH](http:
 
 ```
 $./whisper.py -s "Wow! A message through Stellar!" -a GCU2RRJHYBEIP6R6SJHLTCC32FVFGATYMTYB3ZBKT3OMPZLCTVSS7ZDH -k .bob_wallet
-Enter password: 
+Enter password:
 Sending message to GCU2RRJHYBEIP6R6SJHLTCC32FVFGATYMTYB3ZBKT3OMPZLCTVSS7ZDH...
 Done.
 ```
@@ -193,15 +189,16 @@ Alice can indeed read the message.
 
 ```
 $./whisper.py -r -n 1 -k .alice_wallet
-Enter password: 
+Enter password:
 Last 1 message(s)...
   1) Wow! A message through Stellar!
 ```
 
-
 ## TODO
-- [ ] Implement password protection for the seed file.
+
+- [x] Implement password protection for the seed file.
 - [ ] Implement the defined message encodings.
+- [ ] Introduce argument for specifying the cursor from where to start reading messages.
 - [ ] Integrate federation address handling.
 - [ ] Make the implementation cleaner (refactor).
 - [ ] Provide a library, e.g. for integrating into wallet software.
