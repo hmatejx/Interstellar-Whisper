@@ -8,10 +8,21 @@ This [project](https://github.com/hmatejx/Interstellar-Whisper/) holds the devel
 
 ```
 $./whisper.py -h
-whisper.
+    ____  .   __            .    __       ___         .
+ . /  _/___  / /____ *__________/ /____  / / /___ ______ +  /\
+   / // __ \/ __/ _ \/ ___/ ___/ __/ _ \/ / / __ `/ ___/  .'  '.
+ _/ // / / / /_/  __/ /  (__  ) /_/  __/ / / /_/ / /     /======\
+/___/_/ /_____/\___/_/  /____/\__/\___/_/_/\__,_/_/     ;:.  _   ;
+| |   . / / /_  (_)________  ___  _____                 |:. (_)  |
+| | /| / / __ \/ / ___/ __ \/ _ \/ ___/            +    ;:.      ;
+| |/ |/ / / / / (__  ) /_/ /  __/ /                   .' \:.XLM / `.
+|__/|__/_/ /_/_/____/ .___/\___/_/     .        .    / .-'':._.'`-. \
+                   /_/                               |/    /||\    \|
+
+Interstellar Whisper.
 
 Usage:
-  whisper.py (-r [-n N] | -s MSG -a ADDR) [-k FILE]
+  whisper.py (-r [-n N] | -s MSG -a ADDR) [-k FILE] [-e ENC]
   whisper.py -h | --help
   whisper.py -v | --version
 
@@ -22,6 +33,12 @@ Options:
   -n N          Read last N messages (optional for reading) [default: 1].
   -k FILE       Path to the file containing the password-protected stellar
                 seed for your account [default: ~/.stellar/wallet].
+  -e ENC        Required encoding for the message text [default: 0].
+                Valid options are:
+                  0 = raw (no) encoding,
+                  1 = GSM 03.38 encoding,
+                  2 = Sixbit ASCII encoding,
+                  3 = smaz compression.
   -v --version  Display version and exit.
   -h --help     Show this screen.
 ```
@@ -144,7 +161,7 @@ The combination of the header and the fragment will be called a block.
 
         IV = (pk_Alice[0:16] + sequence_number)[-16:]
 
-    Here `sequence_number` is the sequential and increasing number attached to the transaction and incremented in Bob's account after the transaction has been settled. This construction assures that `IV` is unique and direction-dependent. If Alice send Bob a message, the `IV` will be given by the sum of *Bob's* public key and the `sequence_number` of *Alice's* acount. Never reusing the same `IV` is critically important. Failing to do so would catastrophically compromise the encryption (remember both Alice and Bob share the same secret `k`). With the proposed `IV` construction, even if Alice sends Bob the exact same plaintext message within a transaction with the exact same `sequence_number` (the sequence number is only guaranteed to be unique for each Stellar account separately), the `IV` is guaranteed to be different.
+    Here `sequence_number` is the sequential and increasing number attached to the transaction and incremented in Bob's account after the transaction has been settled. This construction assures that `IV` is unique and direction-dependent. If Alice send Bob a message, the `IV` will be given by the sum of *Bob's* public key and the `sequence_number` of *Alice's* account. Never reusing the same `IV` is critically important. Failing to do so would catastrophically compromise the encryption (remember both Alice and Bob share the same secret `k`). With the proposed `IV` construction, even if Alice sends Bob the exact same plaintext message within a transaction with the exact same `sequence_number` (the sequence number is only guaranteed to be unique for each Stellar account separately), the `IV` is guaranteed to be different.
 
     The encrypted block will then be
 
@@ -180,7 +197,19 @@ Bob can send a message to Alice (identified by this address [GCU2R...7ZDH](http:
 
 ```
 $./whisper.py -s "Wow! A message through Stellar!" -a GCU2RRJHYBEIP6R6SJHLTCC32FVFGATYMTYB3ZBKT3OMPZLCTVSS7ZDH -k .bob_wallet
+    ____  .   __            .    __       ___         .
+ . /  _/___  / /____ *__________/ /____  / / /___ ______ +  /\
+   / // __ \/ __/ _ \/ ___/ ___/ __/ _ \/ / / __ `/ ___/  .'  '.
+ _/ // / / / /_/  __/ /  (__  ) /_/  __/ / / /_/ / /     /======\
+/___/_/ /_____/\___/_/  /____/\__/\___/_/_/\__,_/_/     ;:.  _   ;
+| |   . / / /_  (_)________  ___  _____                 |:. (_)  |
+| | /| / / __ \/ / ___/ __ \/ _ \/ ___/            +    ;:.      ;
+| |/ |/ / / / / (__  ) /_/ /  __/ /                   .' \:.XLM / `.
+|__/|__/_/ /_/_/____/ .___/\___/_/     .        .    / .-'':._.'`-. \
+                   /_/                               |/    /||\    \|
+
 Enter password:
+
 Sending message to GCU2RRJHYBEIP6R6SJHLTCC32FVFGATYMTYB3ZBKT3OMPZLCTVSS7ZDH...
 Done.
 ```
@@ -189,10 +218,36 @@ Alice can indeed read the message.
 
 ```
 $./whisper.py -r -n 1 -k .alice_wallet
+   ____  .   __            .    __       ___         .
+ . /  _/___  / /____ *__________/ /____  / / /___ ______ +  /\
+   / // __ \/ __/ _ \/ ___/ ___/ __/ _ \/ / / __ `/ ___/  .'  '.
+ _/ // / / / /_/  __/ /  (__  ) /_/  __/ / / /_/ / /     /======\
+/___/_/ /_____/\___/_/  /____/\__/\___/_/_/\__,_/_/     ;:.  _   ;
+| |   . / / /_  (_)________  ___  _____                 |:. (_)  |
+| | /| / / __ \/ / ___/ __ \/ _ \/ ___/            +    ;:.      ;
+| |/ |/ / / / / (__  ) /_/ /  __/ /                   .' \:.XLM / `.
+|__/|__/_/ /_/_/____/ .___/\___/_/     .        .    / .-'':._.'`-. \
+                   /_/                               |/    /||\    \|
+
 Enter password:
+
 Last 1 message(s)...
   1) Wow! A message through Stellar!
 ```
+
+Note: If you want to play around in the TESTNET using these two demo account, the password of both wallet files is `aaaa1111`, which is something one can reasonably quickly type during testing.
+
+## Installation requirements
+
+You need the following python packages (install them with pip):
+- stellar-base
+- pynacl
+- pycrypto
+- PySmaz
+- privy
+- docopt
+
+The code is written for Python 3.
 
 ## TODO
 
