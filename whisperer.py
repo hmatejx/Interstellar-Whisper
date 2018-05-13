@@ -473,8 +473,6 @@ class Whisperer:
                 messages.append([block[1:(l+1)]])
                 encodings.append(Whisperer.__getEncoding(block))
 
-        print(encodings)
-
         # assemble the encoded messages
         messages = [b''.join(reversed(m)) for m in messages]
 
