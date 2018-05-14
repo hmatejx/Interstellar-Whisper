@@ -40,7 +40,7 @@ def DumpBlocks(blocks):
         h = '0' * (8 - len(h)) + h
         fb = blocks[i][1:]
         fa = Printable(fb)
-        print("{0}|{1}|{2} {3}".format(h[0:5], h[5:8], base64.b16encode(fb).decode(), fa))
+        print('{0}|{1}|{2} {3}'.format(h[0:5], h[5:8], base64.b16encode(fb).decode(), fa))
     print('────────────────────────────────────────────────────────────────────────────────────────')
 
 
@@ -57,7 +57,7 @@ def DumpEncrypted(encrypted):
     print('\nEncrypted blocks')
     print('────────────────────────────────────────────────────────────────────────────────────────')
     for i in range(0, len(encrypted)):
-       print("{}".format(base64.b16encode(encrypted[i]).decode()))
+       print('{}'.format(base64.b16encode(encrypted[i]).decode()))
     print('────────────────────────────────────────────────────────────────────────────────────────')
 
 
@@ -140,25 +140,21 @@ class Whisperer:
 
         # reserved, not implemented
         if enc == 4:
-            print("Warning, not yet implemented!")
             return msg
 
         # reserved, not implemented
         if enc == 5:
-            print("Warning, not yet implemented!")
             return msg
 
         # reserved, not implemented
         if enc == 6:
-            print("Warning, not yet implemented!")
             return msg
 
         # reserved, not implemented
         if enc == 7:
-            print("Warning, not yet implemented!")
             return msg
 
-        print("Error: wrong encoding {} specified!".format(enc))
+        print('\nError: wrong encoding {} specified!'.format(enc))
         return None
 
 
@@ -195,33 +191,29 @@ class Whisperer:
 
         # reserved, not implemented
         if enc == 4:
-            print("Warning, not yet implemented!")
             if printable:
                 return Printable(msg)
             return msg
 
         # reserved, not implemented
         if enc == 5:
-            print("Warning, not yet implemented!")
             if printable:
                 return Printable(msg)
             return msg
 
         # reserved, not implemented
         if enc == 6:
-            print("Warning, not yet implemented!")
             if printable:
                 return Printable(msg)
             return msg
 
         # reserved, not implemented
         if enc == 7:
-            print("Warning, not yet implemented!")
             if printable:
                 return Printable(msg)
             return msg
 
-        print("Error: wrong encoding {} specified!".format(enc))
+        print('Error: wrong encoding {} specified!'.format(enc))
         return None
 
 
@@ -328,15 +320,18 @@ class Whisperer:
                              sending account.
 
         Returns:
-            None.
+            True if successful, False otherwise.
         '''
-        for i in range(0, len(encrypted)):
-            sequence = str(sequence_number + i)
-            builder = Builder(secret = self.__seed, sequence = sequence)
-            builder.append_payment_op(address, '0.0000001', 'XLM')
-            builder.add_hash_memo(encrypted[i])
-            builder.sign()
-            builder.submit()
+        try:
+            for i in range(0, len(encrypted)):
+                sequence = str(sequence_number + i)
+                builder = Builder(secret = self.__seed, sequence = sequence)
+                builder.append_payment_op(address, '0.0000001', 'XLM')
+                builder.add_hash_memo(encrypted[i])
+                builder.sign()
+                builder.submit()
+        except:
+            return False
 
         # todo: check sending status
         return True
@@ -370,19 +365,25 @@ class Whisperer:
 
         Args:
             address: This is the public Stellar address of your receiver.
-            msg: The message (bytes array) that you want to transmit.
+            msg: The message (byte array) that you want to transmit.
             encoding: The encoding to use for the message.
 
         Returns:
             The return value. True if sending was successful, False otherwise.
         '''
 
+        if address == self.__address:
+            print('\nError: sending to yourself is not yet supported!')
+            return False
+
         # encode message
         encoded = Whisperer.__encode(msg, encoding)
 
+        print(encoded)
+
         # encapsulate message
         blocks = Whisperer.__encapsulate(encoded, encoding)
-        if DEBUG > 0:
+        if DEBUG:
             DumpBlocks(blocks)
 
         # calculate shared secret
@@ -399,7 +400,7 @@ class Whisperer:
 
         # encrypt
         encrypted = Whisperer.__encrypt(blocks, k, IV)
-        if DEBUG > 0:
+        if DEBUG:
             DumpEncrypted(encrypted)
 
         # actually perform the sending of the encrypted blocks
@@ -431,19 +432,25 @@ class Whisperer:
         # Get all transactions
         tr = horizon.account_transactions(self.__address, params = {'order': 'desc', 'limit': 100}).get('_embedded').get('records')
 
+        if DEBUG > 1:
+            pprint.pprint(tr)
+
         # filter out only transations from specified address and with memo type = hash
         tr = [t for t in tr if (t.get('source_account') == address or address is None) \
+                                and t.get('source_account') != self.__address \
                                 and t.get('memo_type') == 'hash']
 
         # decrypt memo blocks until a message is found
         messages = []
         encodings = []
+        sender = []
+        dates = []
         nfound = 0
         for t in tr:
             # get the transaction source address
             address = t.get('source_account')
 
-            # calculate shared secret
+            # calcul01ate shared secret
             k = self.__shared(address)
 
             # get sequence number
@@ -454,6 +461,9 @@ class Whisperer:
             IV = (int.from_bytes(pk[0:16], 'big') + sequence_number).to_bytes(17, 'big')[-16:]
             encrypted = base64.b64decode(t.get('memo'))
             block = Whisperer.__decrypt(encrypted, k, IV)
+
+            if DEBUG:
+                DumpBlocks([block])
 
             # check if we have found the message
             l = Whisperer.__getLength(block)
@@ -470,8 +480,13 @@ class Whisperer:
                 # we already found enough messages
                 if (nfound > tail):
                     break
-                messages.append([block[1:(l+1)]])
+                messages.append([block[1:(l + 1)]])
                 encodings.append(Whisperer.__getEncoding(block))
+                sender.append(t.get('source_account'))
+                dates.append(t.get('created_at'))
+
+        if DEBUG:
+            print(encodings)
 
         # assemble the encoded messages
         messages = [b''.join(reversed(m)) for m in messages]
@@ -479,7 +494,7 @@ class Whisperer:
         # decode the messages
         messages = [Whisperer.__decode(messages[i], encodings[i], printable) for i in range(0, len(messages))]
 
-        return messages
+        return [[dates[i], sender[i], messages[i]] for i in range(0, len(messages))]
 
 
     @classmethod

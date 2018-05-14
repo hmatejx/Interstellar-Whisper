@@ -1,7 +1,6 @@
 #!/usr/bin/python3
 
-'''Interstellar Whisper.
-
+'''
 Usage:
   whisper.py (-r [-n N] | -s MSG -a ADDR) [-k FILE] [-e ENC]
   whisper.py -h | --help
@@ -46,9 +45,7 @@ def banner():
 | | /| / / __ \/ / ___/ __ \/ _ \/ ___/            +    ;:.      ;
 | |/ |/ / / / / (__  ) /_/ /  __/ /                   .' \:.XLM / `.
 |__/|__/_/ /_/_/____/ .___/\___/_/     .        .    / .-'':._.'`-. \\
-                   /_/                               |/    /||\    \|\
-
-"""
+                   /_/                               |/    /||\    \|"""
     print(banner)
 
 
@@ -81,10 +78,10 @@ if __name__ == '__main__':
         msg = W.Read(tail = n, printable = False)
 
         # Display messages
-        print('\nLast {} message(s)...'.format(n))
+        print('\033[4m' + '                                                                     ' + '\033[0m')
+        print('\033[4m' + 'Date        From            Message                                  ' + '\033[0m')
         for i in range(0, len(msg)):
-            print('{:>3}) '.format(i + 1), end = '')
-            print(msg[i].decode('utf-8', errors = 'ignore'))
+            print('{:<10}  {:<12}…   {}'.format(msg[i][0][0:10], msg[i][1][0:12], msg[i][2].decode('utf-8', errors = 'ignore')))
 
     elif arguments.get('-s') is not None:
         # Check if message is provided
@@ -93,9 +90,9 @@ if __name__ == '__main__':
         #Check if receiving address is provided
         address = arguments.get('-a')
         if not Whisperer.ValidateAddress(address):
-            print("Error: No valid Stellar destination address provided!")
+            print('\nError: No valid Stellar destination address provided!')
             exit(-1)
 
-        print("Sending message to {}...".format(address))
+        print('\nSending message to {}...\t'.format(address), end = '')
         W.Send(address, msg.encode(), int(arguments.get('-e')))
-        print("Done.")
+        print('Done.')

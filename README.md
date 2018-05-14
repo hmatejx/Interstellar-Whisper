@@ -8,7 +8,7 @@ This [project](https://github.com/hmatejx/Interstellar-Whisper/) holds the devel
 
 ```
 $./whisper.py -h
-    ____  .   __            .    __       ___         .
+     ___  .   __            .    __       ___         .
  . /  _/___  / /____ *__________/ /____  / / /___ ______ +  /\
    / // __ \/ __/ _ \/ ___/ ___/ __/ _ \/ / / __ `/ ___/  .'  '.
  _/ // / / / /_/  __/ /  (__  ) /_/  __/ / / /_/ / /     /======\
@@ -18,9 +18,6 @@ $./whisper.py -h
 | |/ |/ / / / / (__  ) /_/ /  __/ /                   .' \:.XLM / `.
 |__/|__/_/ /_/_/____/ .___/\___/_/     .        .    / .-'':._.'`-. \
                    /_/                               |/    /||\    \|
-
-Interstellar Whisper.
-
 Usage:
   whisper.py (-r [-n N] | -s MSG -a ADDR) [-k FILE] [-e ENC]
   whisper.py -h | --help
@@ -193,7 +190,7 @@ Basically, for receiving the message, the corresponding inverse operations of st
 
 The application is running on TESTNET at the moment, but that can easily be switched as soon as the security measures for protecting your seed are implemented (see TODO).
 
-Bob can send a message to Alice (identified by this address [GCU2R...7ZDH](http://testnet.stellarchain.io/address/GCU2RRJHYBEIP6R6SJHLTCC32FVFGATYMTYB3ZBKT3OMPZLCTVSS7ZDH)):
+Bob  (identified by this address [GCU2R...7ZDH](http://testnet.stellarchain.io/address/GCU2RRJHYBEIP6R6SJHLTCC32FVFGATYMTYB3ZBKT3OMPZLCTVSS7ZDH))can send a message to Alice (identified by this address [GCU2R...7ZDH](http://testnet.stellarchain.io/address/GCU2RRJHYBEIP6R6SJHLTCC32FVFGATYMTYB3ZBKT3OMPZLCTVSS7ZDH)):
 
 ```
 $./whisper.py -s "Wow! A message through Stellar!" -a GCU2RRJHYBEIP6R6SJHLTCC32FVFGATYMTYB3ZBKT3OMPZLCTVSS7ZDH -k .bob_wallet
@@ -207,18 +204,16 @@ $./whisper.py -s "Wow! A message through Stellar!" -a GCU2RRJHYBEIP6R6SJHLTCC32F
 | |/ |/ / / / / (__  ) /_/ /  __/ /                   .' \:.XLM / `.
 |__/|__/_/ /_/_/____/ .___/\___/_/     .        .    / .-'':._.'`-. \
                    /_/                               |/    /||\    \|
-
 Enter password:
 
-Sending message to GCU2RRJHYBEIP6R6SJHLTCC32FVFGATYMTYB3ZBKT3OMPZLCTVSS7ZDH...
-Done.
+Sending message to GCU2RRJHYBEIP6R6SJHLTCC32FVFGATYMTYB3ZBKT3OMPZLCTVSS7ZDH...  Done.
 ```
 
 Alice can indeed read the message.
 
 ```
 $./whisper.py -r -n 1 -k .alice_wallet
-   ____  .   __            .    __       ___         .
+    ____  .   __            .    __       ___         .
  . /  _/___  / /____ *__________/ /____  / / /___ ______ +  /\
    / // __ \/ __/ _ \/ ___/ ___/ __/ _ \/ / / __ `/ ___/  .'  '.
  _/ // / / / /_/  __/ /  (__  ) /_/  __/ / / /_/ / /     /======\
@@ -228,11 +223,10 @@ $./whisper.py -r -n 1 -k .alice_wallet
 | |/ |/ / / / / (__  ) /_/ /  __/ /                   .' \:.XLM / `.
 |__/|__/_/ /_/_/____/ .___/\___/_/     .        .    / .-'':._.'`-. \
                    /_/                               |/    /||\    \|
-
 Enter password:
 
-Last 1 message(s)...
-  1) Wow! A message through Stellar!
+Date        From            Message
+2018-04-24  GD2TA2JCQTM6…   Wow! A message through Stellar!
 ```
 
 Note: If you want to play around in the TESTNET using these two demo account, the password of both wallet files is `aaaa1111`, which is something one can reasonably quickly type during testing.
@@ -251,7 +245,7 @@ The code is written in Python 3. You need the following python packages (install
 ## TODO
 
 - [x] Implement password protection for the seed file.
-- [ ] Implement the defined message encodings.
+- [x] Implement the defined message encodings.
 - [ ] Introduce argument for specifying the cursor from where to start reading messages.
 - [ ] Integrate federation address handling.
 - [ ] Make the implementation cleaner (refactor).
