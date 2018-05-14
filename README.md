@@ -246,6 +246,7 @@ The code is written in Python 3. You need the following python packages (install
 - [pySmaz](https://github.com/CordySmith/PySmaz)
 - [privy](https://github.com/ofek/privy)
 - [docopt](https://github.com/docopt/docopt)
+- [bitstring](http://scott-griffiths.github.io/bitstring/)
 
 ## TODO
 
