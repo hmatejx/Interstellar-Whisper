@@ -237,17 +237,15 @@ Last 1 message(s)...
 
 Note: If you want to play around in the TESTNET using these two demo account, the password of both wallet files is `aaaa1111`, which is something one can reasonably quickly type during testing.
 
-## Installation requirements
+## Requirements
 
-You need the following python packages (install them with pip):
-- stellar-base
-- pynacl
-- pycrypto
-- PySmaz
-- privy
-- docopt
-
-The code is written for Python 3.
+The code is written in Python 3. You need the following python packages (install them with pip):
+- [stellar-base](https://github.com/StellarCN/py-stellar-base/)
+- [PyNaCl](https://github.com/pyca/pynacl/)
+- [pycrypto](https://github.com/dlitz/pycrypto)
+- [pySmaz](https://github.com/CordySmith/PySmaz)
+- [privy](https://github.com/ofek/privy)
+- [docopt](https://github.com/docopt/docopt)
 
 ## TODO
 
