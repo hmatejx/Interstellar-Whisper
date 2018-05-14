@@ -190,7 +190,7 @@ Basically, for receiving the message, the corresponding inverse operations of st
 
 The application is running on TESTNET at the moment, but that can easily be switched as soon as the security measures for protecting your seed are implemented (see TODO).
 
-Bob  (identified by this address [GCU2R...7ZDH](http://testnet.stellarchain.io/address/GCU2RRJHYBEIP6R6SJHLTCC32FVFGATYMTYB3ZBKT3OMPZLCTVSS7ZDH))can send a message to Alice (identified by this address [GCU2R...7ZDH](http://testnet.stellarchain.io/address/GCU2RRJHYBEIP6R6SJHLTCC32FVFGATYMTYB3ZBKT3OMPZLCTVSS7ZDH)):
+Bob  (identified by this address [GD2TA...2TIY](http://testnet.stellarchain.io/address/GD2TA2JCQTM6ILRQB2JL3GIZSUKHVU5MDJSHRLM7VMNORLT6SZB72TIY)) can send a message to Alice (identified by this address [GCU2R...7ZDH](http://testnet.stellarchain.io/address/GCU2RRJHYBEIP6R6SJHLTCC32FVFGATYMTYB3ZBKT3OMPZLCTVSS7ZDH)):
 
 ```
 $./whisper.py -s "Wow! A message through Stellar!" -a GCU2RRJHYBEIP6R6SJHLTCC32FVFGATYMTYB3ZBKT3OMPZLCTVSS7ZDH -k .bob_wallet
