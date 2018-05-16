@@ -138,7 +138,7 @@ The encapsulation is easiest to describe on an example. Imagine wanting to trans
   | 110         | RESERVED for future use |||
   | 111         | RESERVED for future use |||
 
-  For example, the headers of fragments the above hypothetical 46 B compression-encoded payload would like this:
+  For example, the headers of the two fragments of the above hypothetical 46 B compression-encoded payload would like this:
 
       |0 1 2 3 4 5 6 7|
       ┌─┬─┬─┬─┬─┬─┬─┬─┐
@@ -154,7 +154,7 @@ The combination of the header and the fragment will be called a block.
 
 - Let's call `b_i` a (zero-padded, if required) block of the payload.
 
-- The initiation vector (nonce) is given by the binary sum of the first 16 bytes of Alice's public key,
+- The initiation vector (nonce) is given by the sum of the first 16 bytes of Alice's public key (interpreted as an integer) and the sending accounts' sequence number. Specifically,
 
         IV = (pk_Alice[0:16] + sequence_number)[-16:]
 
@@ -229,7 +229,7 @@ Date        From            Message
 2018-04-24  GD2TA2JCQTM6…   Wow! A message through Stellar!
 ```
 
-Note: If you want to play around in the TESTNET using these two demo account, the password of both wallet files is `aaaa1111`, which is something one can reasonably quickly type during testing.
+Note: If you want to play around in the TESTNET using these two demo accounts, the password of both wallet files is `aaaa1111`, which is something one can reasonably quickly type during testing.
 
 ## Requirements
 
