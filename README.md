@@ -40,6 +40,15 @@ Options:
   -h --help     Show this screen.
 ```
 
+## Similar projects!
+
+As a shout-out to fellow like-minded cryptonauts (is this even a word?) I'm starting with some links to similar projects that I found about recently:
+
+- https://github.com/stellarguard/secret-memo, a Stellar implementation by [@stellarguard](https://stellarguard.me/)
+- https://github.com/WietseWind/xrp-ledgerstats, a Ripple implementation by [@WietseWind](https://twitter.com/wietsewind)
+
+It's inspiring to see other people to come to similar ideas!
+
 ## Introduction
 
 Previous attempts at ubiquitous encryption, such as the *Web of trust* concepts of PGP/GPG, PKI, and DNSSEC have been (and to some extent still are) hampered by a lack of proper incentives. Security just isn't considered a must-have in the eyes of a typical user.
@@ -190,7 +199,7 @@ Basically, for receiving the message, the corresponding inverse operations of st
 
 The application is running on TESTNET at the moment, but that can easily be switched as soon as the security measures for protecting your seed are implemented (see TODO).
 
-Bob  (identified by this address [GD2TA...2TIY](http://testnet.stellarchain.io/address/GD2TA2JCQTM6ILRQB2JL3GIZSUKHVU5MDJSHRLM7VMNORLT6SZB72TIY)) can send a message to Alice (identified by this address [GCU2R...7ZDH](http://testnet.stellarchain.io/address/GCU2RRJHYBEIP6R6SJHLTCC32FVFGATYMTYB3ZBKT3OMPZLCTVSS7ZDH)):
+Bob (identified by this address [GD2TA...2TIY](http://testnet.stellarchain.io/address/GD2TA2JCQTM6ILRQB2JL3GIZSUKHVU5MDJSHRLM7VMNORLT6SZB72TIY)) can send a message to Alice (identified by this address [GCU2R...7ZDH](http://testnet.stellarchain.io/address/GCU2RRJHYBEIP6R6SJHLTCC32FVFGATYMTYB3ZBKT3OMPZLCTVSS7ZDH)):
 
 ```
 $./whisper.py -s "Wow! A message through Stellar!" -a GCU2RRJHYBEIP6R6SJHLTCC32FVFGATYMTYB3ZBKT3OMPZLCTVSS7ZDH -k .bob_wallet
