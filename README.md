@@ -45,7 +45,7 @@ Options:
 As a shout-out to fellow like-minded cryptonauts (is this even a word?) I'm starting with some links to similar projects that I found about recently:
 
 - https://github.com/stellarguard/secret-memo, a Stellar implementation by [@stellarguard](https://stellarguard.me/)
-- https://github.com/WietseWind/xrp-ledgerstats, a Ripple implementation by [@WietseWind](https://twitter.com/wietsewind)
+- https://github.com/WietseWind/Secure-XRP-Text, a Ripple implementation by [@WietseWind](https://twitter.com/wietsewind)
 
 It's inspiring to see other people to come to similar ideas!
 
@@ -167,7 +167,7 @@ The combination of the header and the fragment will be called a block.
 
         IV = (pk_Alice[0:16] + sequence_number)[-16:]
 
-    Here `sequence_number` is the sequential and increasing number attached to the transaction and incremented in Bob's account after the transaction has been settled. This construction assures that `IV` is unique and direction-dependent. If Alice send Bob a message, the `IV` will be given by the sum of *Bob's* public key and the `sequence_number` of *Alice's* account. Never reusing the same `IV` is critically important. Failing to do so would catastrophically compromise the encryption (remember both Alice and Bob share the same secret `k`). With the proposed `IV` construction, even if Alice sends Bob the exact same plaintext message within a transaction with the exact same `sequence_number` (the sequence number is only guaranteed to be unique for each Stellar account separately), the `IV` is guaranteed to be different.
+    Here `sequence_number` is the sequential and increasing number attached to the transaction and incremented in Bob's account after the transaction has been settled. This construction assures that `IV` is unique and direction-dependent. If Alice sends Bob a message, the `IV` will be given by the sum of *Bob's* public key and the `sequence_number` of *Alice's* account. Never reusing the same `IV` is critically important. Failing to do so would catastrophically compromise the encryption (remember both Alice and Bob share the same secret `k`). With the proposed `IV` construction, even if Alice sends Bob the exact same plaintext message within a transaction with the exact same `sequence_number` (the sequence number is only guaranteed to be unique for each Stellar account separately), the `IV` is guaranteed to be different, unless a collision of the first 16 bytes of the public key occurs which is highly unlikely (~1 in 2<sup>64</sup> chance).
 
     The encrypted block will then be
 
