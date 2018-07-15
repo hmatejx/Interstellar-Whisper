@@ -108,7 +108,7 @@ The encapsulation is easiest to describe on an example. Imagine wanting to trans
 1. The first step of encapsulation is to split the payload into fragments of maximum length of 31 bytes, resulting in two fragments of lengths of 31 and 15.
 
        |0                  |10                 |20                 |30
-       |0 1 2 3 4 5 6 7 8 9|0 1 2 3 4 5 6 7 8 0|1 2 3 4 5 6 7 8 9 0|1
+       |0 1 2 3 4 5 6 7 8 9|0 1 2 3 4 5 6 7 8 9|0 1 2 3 4 5 6 7 8 9|0
        ┌─┬─┬─┬─┬─┬─┬─┬─┬─┬─┬─┬─┬─┬─┬─┬─┬─┬─┬─┬─┬─┬─┬─┬─┬─┬─┬─┬─┬─┬─┬─┐
        | Fragment 1                                         31 bytes |
        └─┴─┴─┴─┴─┴─┴─┴─┴─┴─┴─┴─┴─┴─┴─┴─┴─┴─┴─┴─┴─┴─┴─┴─┴─┴─┴─┴─┴─┴─┴─┘
@@ -119,7 +119,7 @@ The encapsulation is easiest to describe on an example. Imagine wanting to trans
 2. Next, a 1 byte header `H` is attached to each fragment
 
        |0                  |10                 |20                 |30
-       |0 1 2 3 4 5 6 7 8 9|0 1 2 3 4 5 6 7 8 0|1 2 3 4 5 6 7 8 9 0|1 2
+       |0 1 2 3 4 5 6 7 8 9|0 1 2 3 4 5 6 7 8 9|0 1 2 3 4 5 6 7 8 9|0 1
        ┌─┬─┬─┬─┬─┬─┬─┬─┬─┬─┬─┬─┬─┬─┬─┬─┬─┬─┬─┬─┬─┬─┬─┬─┬─┬─┬─┬─┬─┬─┬─┬─┐
        |H| Fragment 1                                1 + 31 = 32 bytes |
        └─┴─┴─┴─┴─┴─┴─┴─┴─┴─┴─┴─┴─┴─┴─┴─┴─┴─┴─┴─┴─┴─┴─┴─┴─┴─┴─┴─┴─┴─┴─┴─┘
@@ -127,16 +127,16 @@ The encapsulation is easiest to describe on an example. Imagine wanting to trans
        |H| Fragment 2  1 + 15 = 16 bytes |
        └─┴─┴─┴─┴─┴─┴─┴─┴─┴─┴─┴─┴─┴─┴─┴─┴─┘
 
-  The 8 bits of the header depend on the *length* `L` of the fragment (bits 1 - 5) and on the *encoding* `E` of the payload (bits 6 - 8). The first 5 bits of the header encode the fragment length:
+  The 8 bits of the header depend on the *length* `L` of the fragment (encoded in bits 0 - 4) and on the *encoding* `E` of the payload (encoded in bits 5 - 7). The fragment length is encoded in the header in the following way:
 
-  | Length (L) | Header 1-5      | Description                                                |
+  | Length (L) | Header bits 0-4 | Description                                                |
   | ---------- | --------------- | ---------------------------------------------------------- |
   | 1 ... 31   | 00001 ... 11111 | Last fragment of the payload of size L                     |
   | 0          | 00000           | Full-size fragment, payload continues in the next fragment |
 
   The next 3 bits of the header encode the encoding:
 
-  | Header 6-8 | Content | Description | Symbol rate                                    |
+  | Header bits 5-7  | Content | Description | Symbol rate                                    |
   | ----------- | ------------------------- | ------------------------------------------------------------ | -------------------------- |
   | 000 | binary                    | no encoding, raw 8-bit                                       | 31 B / fragment      |
   | 001         | SMS TEXT                  | [GSM 03.38 charset](https://www.openmarket.com/docs/Content/Images/sms/characterset-gsm-characters.png) | 35 characters / fragment |
@@ -147,9 +147,9 @@ The encapsulation is easiest to describe on an example. Imagine wanting to trans
   | 110         | RESERVED for future use |||
   | 111         | RESERVED for future use |||
 
-  For example, the headers of the two fragments of the above hypothetical 46 B compression-encoded payload would like this:
+  For instance, the headers of fragments of the above hypothetical 46 B compression-encoded payload look like this:
 
-      |0 1 2 3 4 5 6 7|
+      |0 1 2 3 4|5 6 7|
       ┌─┬─┬─┬─┬─┬─┬─┬─┐
       |0 0 0 0 0|0 1 1|    header of Fragment 1
       └─┴─┴─┴─┴─┴─┴─┴─┘
