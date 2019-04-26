@@ -1,4 +1,4 @@
-from stellar_base.address import Address
+from stellar_base import Address
 from stellar_base.keypair import Keypair
 from stellar_base.utils import encode_check, decode_check
 from stellar_base.horizon import horizon_testnet
@@ -430,7 +430,7 @@ class Whisperer:
         '''
 
         # Get all transactions
-        tr = horizon.account_transactions(self.__address, params = {'order': 'desc', 'limit': 100}).get('_embedded').get('records')
+        tr = horizon.account_transactions(self.__address, order='desc', limit=100).get('_embedded').get('records')
 
         if DEBUG > 1:
             pprint.pprint(tr)
