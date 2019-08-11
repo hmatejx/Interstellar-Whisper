@@ -25,6 +25,7 @@ Options:
 from docopt import docopt
 import wallet
 from getpass import getpass
+import textwrap
 
 # stellar-base
 from stellar_base.address import Address
@@ -81,7 +82,10 @@ if __name__ == '__main__':
         print('\033[4m' + '                                                                     ' + '\033[0m')
         print('\033[4m' + 'Date        From            Message                                  ' + '\033[0m')
         for i in range(0, len(msg)):
-            print('{:<10}  {:<12}…   {}'.format(msg[i][0][0:10], msg[i][1][0:12], msg[i][2].decode('utf-8', errors = 'ignore')))
+          msgparts = textwrap.wrap(msg[i][2].decode('utf-8', errors = 'ignore'), 41) #[msg[i][2][j:j+41] for j in range(0, len(msg[i][2]), 41)]
+          print('{:<10}  {:<12}…   {}'.format(msg[i][0][0:10], msg[i][1][0:12], msgparts[0]))
+          for m in msgparts[1:]:
+            print('                            {}'.format(m))
 
     elif arguments.get('-s') is not None:
         # Check if message is provided

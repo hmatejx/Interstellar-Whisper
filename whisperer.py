@@ -379,8 +379,6 @@ class Whisperer:
         # encode message
         encoded = Whisperer.__encode(msg, encoding)
 
-        print(encoded)
-
         # encapsulate message
         blocks = Whisperer.__encapsulate(encoded, encoding)
         if DEBUG:
